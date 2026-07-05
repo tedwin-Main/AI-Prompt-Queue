@@ -1,0 +1,22 @@
+AI Prompt Queue - Setup and Usage Guide
+
+INSTALLATION
+1. Open Google Chrome.
+2. Go to chrome://extensions/
+3. Turn on "Developer mode" in the top right.
+4. Click "Load unpacked" and select the "extension" folder located at `/Users/sloth/AI Prompt Queue/extension`.
+5. Pin the extension to your toolbar for easy access.
+
+USAGE
+1. Go to gemini.google.com and log in.
+2. Open the extension popup.
+3. Queue prompts manually, import a .txt file (one prompt per line block, separated by double newlines), or select text on any page and right click -> "Add to Queue".
+4. Adjust the delay slider if needed (default is 3 seconds).
+5. Press "Start". The extension will automatically type and send each prompt, wait for Gemini to finish generating, save the result, and move to the next.
+6. You can "Pause" at any time and "Resume" later.
+7. If Gemini hits a rate limit, the queue will automatically pause and alert you.
+
+HISTORY & EXPORT
+1. Click the "History" tab to view all completed prompts and their corresponding responses.
+2. Click "Export Results" to download a .json file of your entire queue history.
+3. Click "Clear" to wipe the history.

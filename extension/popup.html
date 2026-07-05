@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Prompt Queue</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Prompt Queue</h1>
+            <div id="status-badge" class="badge idle">Idle</div>
+        </header>
+
+        <div class="tabs">
+            <button id="tab-queue" class="tab active">Queue</button>
+            <button id="tab-history" class="tab">History</button>
+        </div>
+
+        <div id="view-queue" class="view active-view">
+            <section class="queue-input-section">
+                <textarea id="prompt-input" placeholder="Enter new prompt..."></textarea>
+                <div class="actions">
+                    <input type="file" id="import-file" style="display:none;" accept=".txt,.json">
+                    <button id="import-btn" class="secondary-btn">Import</button>
+                    <button id="add-btn" class="primary-btn">Add to Queue</button>
+                </div>
+            </section>
+
+            <section class="settings-section">
+                <label for="delay-slider">Delay between prompts: <span id="delay-value">3</span>s</label>
+                <input type="range" id="delay-slider" min="0" max="30" value="3">
+            </section>
+
+            <section class="progress-section" style="display:none;" id="progress-container">
+                <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            </section>
+
+            <section class="queue-list-section">
+                <h2>Queue (<span id="queue-count">0</span>)</h2>
+                <ul id="queue-list">
+                    <!-- Queue items -->
+                </ul>
+            </section>
+
+            <footer class="controls">
+                <button id="start-btn" class="success-btn">Start</button>
+                <button id="pause-btn" class="warning-btn" style="display:none;">Pause</button>
+                <button id="stop-btn" class="danger-btn">Stop</button>
+            </footer>
+        </div>
+
+        <div id="view-history" class="view">
+            <div class="history-actions">
+                <button id="export-btn" class="primary-btn">Export Results</button>
+                <button id="clear-history-btn" class="danger-btn">Clear</button>
+            </div>
+            <ul id="history-list">
+                <!-- History items -->
+            </ul>
+        </div>
+    </div>
+    
+    <script src="utils/queue.js"></script>
+    <script src="popup.js"></script>
+</body>
+</html>
