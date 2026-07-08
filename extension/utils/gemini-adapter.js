@@ -48,4 +48,4 @@ const GeminiAdapter = {
     }
 };
 
-window.GeminiAdapter = GeminiAdapter;
+window.AIAdapter = GeminiAdapter;

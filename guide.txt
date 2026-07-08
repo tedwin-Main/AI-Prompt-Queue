@@ -8,13 +8,13 @@ INSTALLATION
 5. Pin the extension to your toolbar for easy access.
 
 USAGE
-1. Go to gemini.google.com and log in.
+1. Go to gemini.google.com, chatgpt.com, or claude.ai and log in.
 2. Open the extension popup.
 3. Queue prompts manually, import a .txt file (one prompt per line block, separated by double newlines), or select text on any page and right click -> "Add to Queue".
 4. Adjust the delay slider if needed (default is 3 seconds).
-5. Press "Start". The extension will automatically type and send each prompt, wait for Gemini to finish generating, save the result, and move to the next.
+5. Press "Start". The extension will automatically type and send each prompt, wait for the AI to finish generating, save the result, and move to the next.
 6. You can "Pause" at any time and "Resume" later.
-7. If Gemini hits a rate limit, the queue will automatically pause and alert you.
+7. If the AI hits a rate limit, the queue will automatically pause and alert you.
 
 HISTORY & EXPORT
 1. Click the "History" tab to view all completed prompts and their corresponding responses.

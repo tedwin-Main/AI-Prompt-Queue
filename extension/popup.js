@@ -177,7 +177,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const blob = new Blob([data], {type: 'application/json'});
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url; a.download = 'gemini-results.json';
+        a.href = url; a.download = 'ai-results.json';
         a.click();
     };
 
@@ -189,14 +189,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     startBtn.onclick = () => {
         chrome.tabs.query({active: true, currentWindow: true}, async (tabs) => {
-            if (tabs[0] && tabs[0].url.includes("gemini.google.com")) {
+            if (tabs[0] && (tabs[0].url.includes("gemini.google.com") || tabs[0].url.includes("chatgpt.com") || tabs[0].url.includes("claude.ai"))) {
                 totalItemsRun = 0;
                 await queueManager.setRunning(true);
                 await queueManager.setPaused(false);
                 chrome.tabs.sendMessage(tabs[0].id, { action: "START_QUEUE" });
                 syncState();
             } else {
-                alert("Please navigate to gemini.google.com to start the queue.");
+                alert("Please navigate to gemini.google.com, chatgpt.com, or claude.ai to start the queue.");
             }
         });
     };

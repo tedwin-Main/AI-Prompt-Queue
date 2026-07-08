@@ -1,7 +1,7 @@
 // background.js
 
 chrome.runtime.onInstalled.addListener(() => {
-  console.log("Gemini Prompt Queue installed.");
+  console.log("AI Prompt Queue installed.");
   chrome.storage.local.set({ 
     queue: [],
     history: [],

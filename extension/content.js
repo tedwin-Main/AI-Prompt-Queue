@@ -1,6 +1,6 @@
 // content.js
 
-console.log( "Gemini Prompt Queue content script loaded" );
+console.log( "AI Prompt Queue content script loaded" );
 
 let isRunning = false;
 let isPaused = false;
@@ -19,7 +19,15 @@ function injectFloatingPanel ()
     const panelHTML = `
         <div id="apq-panel">
             <div id="apq-header">
-                <span id="apq-title">AI Prompt Queue <span id="apq-badge">0</span></span>
+                <span id="apq-title">AI Prompt Queue <span id="apq-badge">0</span>
+                    <span id="apq-help-wrapper">?
+                        <span id="apq-help-tooltip">
+                            Shortcuts:<br/>
+                            • <b>Cmd (Mac) / Ctrl (Win) + Enter</b>: Send to Queue<br/>
+                            • <b>Shift + Enter</b>: New line
+                        </span>
+                    </span>
+                </span>
                 <span id="apq-toggle">-</span>
             </div>
             <div id="apq-content">
@@ -253,20 +261,20 @@ function processNextInQueue ()
         currentPrompt = queue.shift();
         chrome.storage.local.set( { queue: queue }, () =>
         {
-            sendMessageToGemini( currentPrompt, delay );
+            sendMessageToAI( currentPrompt, delay );
         } );
     } );
 }
 
-function sendMessageToGemini ( message, delaySeconds )
+function sendMessageToAI ( message, delaySeconds )
 {
     if ( !isRunning || isPaused ) return;
 
-    const inputArea = window.GeminiAdapter.getInput();
+    const inputArea = window.AIAdapter.getInput();
     if ( !inputArea )
     {
-        console.error( "Gemini input not found. Retrying in 1s..." );
-        setTimeout( () => sendMessageToGemini( message, delaySeconds ), 1000 );
+        console.error( "AI input not found. Retrying in 1s..." );
+        setTimeout( () => sendMessageToAI( message, delaySeconds ), 1000 );
         return;
     }
 
@@ -278,7 +286,7 @@ function sendMessageToGemini ( message, delaySeconds )
 
     setTimeout( () =>
     {
-        const submitBtn = window.GeminiAdapter.getSubmit();
+        const submitBtn = window.AIAdapter.getSubmit();
         if ( submitBtn && !submitBtn.disabled )
         {
             submitBtn.click();
@@ -311,7 +319,7 @@ function waitForResponseComplete ( delaySeconds )
             return;
         }
 
-        if ( window.GeminiAdapter.hasRateLimitError() )
+        if ( window.AIAdapter.hasRateLimitError() )
         {
             observer.disconnect();
             console.error( "Rate limit detected." );
@@ -334,14 +342,14 @@ function waitForResponseComplete ( delaySeconds )
         setTimeout( () =>
         {
             isWaiting = false;
-            if ( window.GeminiAdapter.isResponseComplete() )
+            if ( window.AIAdapter.isResponseComplete() )
             {
                 console.log( "Response complete." );
                 observer.disconnect();
                 currentObserver = null;
 
                 // Save result
-                const responseText = window.GeminiAdapter.getLastResponseText();
+                const responseText = window.AIAdapter.getLastResponseText();
                 chrome.storage.local.get( [ 'history' ], ( res ) =>
                 {
                     const history = res.history || [];
