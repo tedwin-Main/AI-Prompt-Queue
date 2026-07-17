@@ -59,6 +59,7 @@
     padding: 8px;
     box-sizing: border-box;
     resize: none;
+    font-size: 12px;
 }
 
 #apq-controls {
@@ -74,6 +75,7 @@
     border-radius: 4px;
     cursor: pointer;
     font-weight: bold;
+    font-size: 12px;
 }
 
 .apq-btn-add { background: #8ab4f8; color: #000; }

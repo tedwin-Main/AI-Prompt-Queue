@@ -110,7 +110,7 @@ function injectFloatingPanel ()
             {
                 const q = res.queue || [];
                 q.push( text );
-                chrome.storage.local.set( { queue: q, isRunning: true, isPaused: false }, () =>
+                chrome.storage.local.set( { queue: q, pendingText: "", isRunning: true, isPaused: false }, () =>
                 {
                     input.value = '';
                     if ( !res.isRunning ) handleMessage( { action: "START_QUEUE" } );
@@ -137,11 +137,26 @@ function injectFloatingPanel ()
 
     // Initial render
     updatePanelUI();
+    chrome.storage.local.get(['pendingText'], (res) => {
+        if (res.pendingText) {
+            document.getElementById('apq-input').value = res.pendingText;
+        }
+    });
+
+    document.getElementById('apq-input').addEventListener('input', (e) => {
+        chrome.storage.local.set({ pendingText: e.target.value });
+    });
 
     // Listen to storage changes to keep UI in sync
     chrome.storage.onChanged.addListener( ( changes ) =>
     {
         updatePanelUI();
+        if (changes.pendingText !== undefined) {
+            const input = document.getElementById('apq-input');
+            if (input && document.activeElement !== input) {
+                input.value = changes.pendingText.newValue || "";
+            }
+        }
     } );
 }
 

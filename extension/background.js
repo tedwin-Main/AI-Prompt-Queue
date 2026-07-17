@@ -12,17 +12,17 @@ chrome.runtime.onInstalled.addListener(() => {
 
   chrome.contextMenus.create({
     id: "addToQueue",
-    title: "Add '%s' to Queue",
+    title: "Add '%s' to AI Prompt Queue",
     contexts: ["selection"]
   });
 });
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId === "addToQueue") {
-    chrome.storage.local.get(['queue'], (result) => {
-      const queue = result.queue || [];
-      queue.push(info.selectionText);
-      chrome.storage.local.set({ queue });
+    chrome.storage.local.get(['pendingText'], (result) => {
+      const current = result.pendingText || "";
+      const newText = current ? current + "\\n" + info.selectionText : info.selectionText;
+      chrome.storage.local.set({ pendingText: newText });
     });
   }
 });
