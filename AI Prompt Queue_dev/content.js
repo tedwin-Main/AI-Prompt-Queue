@@ -296,7 +296,9 @@ function sendMessageToAI ( message, delaySeconds )
     }
 
     inputArea.focus();
-    inputArea.innerHTML = `<p>${message}</p>`;
+    const promptParagraph = document.createElement( 'p' );
+    promptParagraph.textContent = message;
+    inputArea.replaceChildren( promptParagraph );
 
     const inputEvent = new Event( 'input', { bubbles: true, cancelable: true } );
     inputArea.dispatchEvent( inputEvent );

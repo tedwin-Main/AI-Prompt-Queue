@@ -49,3 +49,9 @@ Currently, the extension is available for manual installation:
 ## 📄 License
 
 This project is licensed under the MIT License.
+
+## 🔒 Privacy
+
+AI Prompt Queue processes prompts, user-selected text, and AI responses to provide its queue and local history features. Prompts are sent only to the supported AI service selected by the user. Data is not sent to the extension developer.
+
+See the [Privacy Policy](PRIVACY_POLICY.md) for details.

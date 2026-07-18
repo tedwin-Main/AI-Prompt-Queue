@@ -87,11 +87,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function renderHistory() {
-        historyListEl.innerHTML = '';
+        historyListEl.replaceChildren();
         queueManager.history.forEach(h => {
             const li = document.createElement('li');
             li.className = 'history-item';
-            li.innerHTML = `<strong>${h.prompt}</strong><p>${h.response}</p>`;
+
+            const prompt = document.createElement('strong');
+            prompt.textContent = h.prompt;
+
+            const response = document.createElement('p');
+            response.textContent = h.response;
+
+            li.appendChild(prompt);
+            li.appendChild(response);
             historyListEl.appendChild(li);
         });
     }
