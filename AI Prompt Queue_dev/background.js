@@ -4,11 +4,7 @@ chrome.runtime.onInstalled.addListener(() => {
   console.log("AI Prompt Queue installed.");
 
   const defaults = {
-    queue: [],
-    history: [],
-    isRunning: false,
-    isPaused: false,
-    delay: 3
+    queue: []
   };
 
   chrome.storage.local.get(Object.keys(defaults), (stored) => {
@@ -22,6 +18,9 @@ chrome.runtime.onInstalled.addListener(() => {
       chrome.storage.local.set(missingDefaults);
     }
   });
+
+  // Version 1.3 removes response history and popup-only processing settings.
+  chrome.storage.local.remove(["history", "isRunning", "isPaused", "delay"]);
 
   chrome.contextMenus.removeAll(() => {
     chrome.contextMenus.create({

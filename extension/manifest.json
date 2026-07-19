@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "AI Prompt Queue",
-  "version": "1.2",
-  "description": "Queues multiple messages to be sent sequentially to your AI.",
+  "version": "1.3",
+  "description": "Queue prompts and send them sequentially on ChatGPT, Gemini, and Claude.",
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
@@ -10,20 +10,10 @@
   },
   "permissions": [
     "storage",
-    "activeTab",
     "contextMenus"
   ],
   "background": {
     "service_worker": "background.js"
-  },
-  "action": {
-    "default_popup": "popup.html",
-    "default_title": "Open Prompt Queue",
-    "default_icon": {
-      "16": "icons/icon16.png",
-      "48": "icons/icon48.png",
-      "128": "icons/icon128.png"
-    }
   },
   "content_scripts": [
     {

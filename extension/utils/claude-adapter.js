@@ -25,13 +25,6 @@ const ClaudeAdapter = {
         return !stopBtn && !!sendBtn;
     },
 
-    getLastResponseText: () => {
-        const responses = document.querySelectorAll('.font-claude-message');
-        if (responses.length === 0) return "";
-        const lastResponse = responses[responses.length - 1];
-        return lastResponse.innerText || lastResponse.textContent;
-    },
-
     hasRateLimitError: () => {
         const alerts = document.querySelectorAll('.text-red-500, [role="alert"]');
         for (let alert of alerts) {

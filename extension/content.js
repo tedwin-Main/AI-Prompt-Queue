@@ -3,10 +3,10 @@
 console.log( "AI Prompt Queue content script loaded" );
 
 let isRunning = false;
-let isPaused = false;
 let currentObserver = null;
 let currentPrompt = "";
 let panelInjected = false;
+const PROMPT_DELAY_SECONDS = 3;
 
 // Inject UI on load
 injectFloatingPanel();
@@ -19,21 +19,13 @@ function injectFloatingPanel ()
     const panelHTML = `
         <div id="apq-panel">
             <div id="apq-header">
-                <span id="apq-title">AI Prompt Queue <span id="apq-badge">0</span>
-                    <span id="apq-help-wrapper">?
-                        <span id="apq-help-tooltip">
-                            Shortcuts:<br/>
-                            • <b>Cmd (Mac) / Ctrl (Win) + Enter</b>: Send to Queue<br/>
-                            • <b>Shift + Enter</b>: New line
-                        </span>
-                    </span>
-                </span>
+                <span id="apq-title">AI Prompt Queue <span id="apq-badge">0</span></span>
                 <span id="apq-toggle">-</span>
             </div>
             <div id="apq-content">
-                <textarea id="apq-input" placeholder="1. Summarize this email&#10;2. Also make it sound professional&#10;3. Draft a reply agreeing to the terms"></textarea>
+                <textarea id="apq-input" placeholder="Enter a prompt&#10;Click Add to Queue or press Cmd/Ctrl + Enter&#10;Repeat to add more prompts"></textarea>
                 <div id="apq-controls">
-                    <button id="apq-send-btn" class="apq-btn-start" style="width:100%;">Send to Queue</button>
+                    <button id="apq-action-btn" class="apq-btn-add">Add to Queue</button>
                 </div>
                 <div id="apq-queue-header">
                     <span id="apq-queue-label">Queued</span>
@@ -100,26 +92,29 @@ function injectFloatingPanel ()
         document.getElementById( 'apq-toggle' ).innerText = panel.classList.contains( 'collapsed' ) ? '+' : '-';
     };
 
-    const sendFn = () =>
+    const actionFn = () =>
     {
         const input = document.getElementById( 'apq-input' );
         const text = input.value.trim();
         if ( text )
         {
-            chrome.storage.local.get( [ 'queue', 'isRunning' ], ( res ) =>
+            chrome.storage.local.get( [ 'queue' ], ( res ) =>
             {
                 const q = res.queue || [];
                 q.push( text );
-                chrome.storage.local.set( { queue: q, pendingText: "", isRunning: true, isPaused: false }, () =>
+                chrome.storage.local.set( { queue: q, pendingText: "" }, () =>
                 {
                     input.value = '';
-                    if ( !res.isRunning ) handleMessage( { action: "START_QUEUE" } );
+                    updatePanelUI();
                 } );
             } );
+        } else
+        {
+            startQueue();
         }
     };
 
-    document.getElementById( 'apq-send-btn' ).onclick = sendFn;
+    document.getElementById( 'apq-action-btn' ).onclick = actionFn;
 
     document.getElementById( 'apq-clear-btn' ).onclick = () =>
     {
@@ -131,7 +126,7 @@ function injectFloatingPanel ()
         if ( ( e.metaKey || e.ctrlKey ) && e.key === 'Enter' )
         {
             e.preventDefault();
-            sendFn();
+            actionFn();
         }
     } );
 
@@ -140,39 +135,49 @@ function injectFloatingPanel ()
     chrome.storage.local.get(['pendingText'], (res) => {
         if (res.pendingText) {
             document.getElementById('apq-input').value = res.pendingText;
+            updatePanelUI();
         }
     });
 
     document.getElementById('apq-input').addEventListener('input', (e) => {
         chrome.storage.local.set({ pendingText: e.target.value });
+        updatePanelUI();
     });
 
     // Listen to storage changes to keep UI in sync
     chrome.storage.onChanged.addListener( ( changes ) =>
     {
-        updatePanelUI();
         if (changes.pendingText !== undefined) {
             const input = document.getElementById('apq-input');
             if (input && document.activeElement !== input) {
                 input.value = changes.pendingText.newValue || "";
             }
         }
+        updatePanelUI();
     } );
 }
 
 function updatePanelUI ()
 {
-    chrome.storage.local.get( [ 'queue', 'isRunning', 'isPaused' ], ( res ) =>
+    chrome.storage.local.get( [ 'queue' ], ( res ) =>
     {
         const list = document.getElementById( 'apq-queue-list' );
         const badge = document.getElementById( 'apq-badge' );
         const queueHeader = document.getElementById( 'apq-queue-header' );
         const emptyState = document.getElementById( 'apq-empty' );
-        const sendBtn = document.getElementById( 'apq-send-btn' );
+        const actionBtn = document.getElementById( 'apq-action-btn' );
 
         if ( !list ) return;
 
         const queue = res.queue || [];
+
+        if ( actionBtn )
+        {
+            const hasInput = document.getElementById( 'apq-input' )?.value.trim().length > 0;
+            actionBtn.disabled = isRunning || ( !hasInput && queue.length === 0 );
+            actionBtn.innerText = isRunning ? 'Running…' : hasInput ? 'Add to Queue' : queue.length > 0 ? 'Send to Queue' : 'Add to Queue';
+            actionBtn.className = hasInput ? 'apq-btn-add' : 'apq-btn-start';
+        }
 
         // Update badge count
         if ( badge )
@@ -222,74 +227,48 @@ function updatePanelUI ()
     } );
 }
 
-
-chrome.runtime.onMessage.addListener( ( request, sender, sendResponse ) =>
+function startQueue ()
 {
-    handleMessage( request );
-} );
-
-function handleMessage ( request )
-{
-    if ( request.action === "START_QUEUE" )
-    {
-        console.log( "Starting queue processing..." );
-        isRunning = true;
-        isPaused = false;
-        processNextInQueue();
-    } else if ( request.action === "STOP_QUEUE" )
-    {
-        console.log( "Stopping queue processing..." );
-        isRunning = false;
-        isPaused = false;
-        if ( currentObserver )
-        {
-            currentObserver.disconnect();
-            currentObserver = null;
-        }
-    } else if ( request.action === "PAUSE_QUEUE" )
-    {
-        isPaused = true;
-    } else if ( request.action === "RESUME_QUEUE" )
-    {
-        isPaused = false;
-        processNextInQueue();
-    }
+    if ( isRunning ) return;
+    console.log( "Starting queue processing..." );
+    isRunning = true;
+    updatePanelUI();
+    processNextInQueue();
 }
 
 function processNextInQueue ()
 {
-    if ( !isRunning || isPaused ) return;
+    if ( !isRunning ) return;
 
-    chrome.storage.local.get( [ 'queue', 'delay' ], ( result ) =>
+    chrome.storage.local.get( [ 'queue' ], ( result ) =>
     {
         const queue = result.queue || [];
-        const delay = result.delay !== undefined ? result.delay : 3;
 
         if ( queue.length === 0 )
         {
             console.log( "Queue is empty. Finished." );
             isRunning = false;
-            chrome.storage.local.set( { isRunning: false } );
+            updatePanelUI();
             return;
         }
 
         currentPrompt = queue.shift();
         chrome.storage.local.set( { queue: queue }, () =>
         {
-            sendMessageToAI( currentPrompt, delay );
+            sendMessageToAI( currentPrompt );
         } );
     } );
 }
 
-function sendMessageToAI ( message, delaySeconds )
+function sendMessageToAI ( message )
 {
-    if ( !isRunning || isPaused ) return;
+    if ( !isRunning ) return;
 
     const inputArea = window.AIAdapter.getInput();
     if ( !inputArea )
     {
         console.error( "AI input not found. Retrying in 1s..." );
-        setTimeout( () => sendMessageToAI( message, delaySeconds ), 1000 );
+        setTimeout( () => sendMessageToAI( message ), 1000 );
         return;
     }
 
@@ -307,19 +286,24 @@ function sendMessageToAI ( message, delaySeconds )
         if ( submitBtn && !submitBtn.disabled )
         {
             submitBtn.click();
-            waitForResponseComplete( delaySeconds );
+            waitForResponseComplete();
             const apqInput = document.getElementById( 'apq-input' );
             if ( apqInput ) apqInput.focus();
         } else
         {
             console.error( "Submit button not found or disabled." );
             isRunning = false;
-            chrome.storage.local.set( { isRunning: false } );
+            chrome.storage.local.get( [ 'queue' ], ( res ) =>
+            {
+                const q = res.queue || [];
+                q.unshift( currentPrompt );
+                chrome.storage.local.set( { queue: q } );
+            } );
         }
     }, 500 );
 }
 
-function waitForResponseComplete ( delaySeconds )
+function waitForResponseComplete ()
 {
     if ( !isRunning ) return;
 
@@ -339,16 +323,16 @@ function waitForResponseComplete ( delaySeconds )
         if ( window.AIAdapter.hasRateLimitError() )
         {
             observer.disconnect();
+            currentObserver = null;
             console.error( "Rate limit detected." );
-            alert( "Rate limit detected! Queue paused." );
+            alert( "Rate limit detected. Queue stopped; click Send to Queue to retry." );
             isRunning = false;
-            isPaused = true;
             // Put message back
             chrome.storage.local.get( [ 'queue' ], ( res ) =>
             {
                 const q = res.queue || [];
                 q.unshift( currentPrompt );
-                chrome.storage.local.set( { queue: q, isRunning: false, isPaused: true } );
+                chrome.storage.local.set( { queue: q } );
             } );
             return;
         }
@@ -365,21 +349,10 @@ function waitForResponseComplete ( delaySeconds )
                 observer.disconnect();
                 currentObserver = null;
 
-                // Save result
-                const responseText = window.AIAdapter.getLastResponseText();
-                chrome.storage.local.get( [ 'history' ], ( res ) =>
+                setTimeout( () =>
                 {
-                    const history = res.history || [];
-                    history.push( { prompt: currentPrompt, response: responseText } );
-                    chrome.storage.local.set( { history }, () =>
-                    {
-                        // Wait delay
-                        setTimeout( () =>
-                        {
-                            processNextInQueue();
-                        }, delaySeconds * 1000 );
-                    } );
-                } );
+                    processNextInQueue();
+                }, PROMPT_DELAY_SECONDS * 1000 );
             }
         }, 1000 );
     } );

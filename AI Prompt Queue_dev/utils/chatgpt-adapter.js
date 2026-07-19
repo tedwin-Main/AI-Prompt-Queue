@@ -17,13 +17,6 @@ const ChatGPTAdapter = {
         return !stopBtn && !!sendBtn;
     },
 
-    getLastResponseText: () => {
-        const responses = document.querySelectorAll('div[data-message-author-role="assistant"]');
-        if (responses.length === 0) return "";
-        const lastResponse = responses[responses.length - 1];
-        return lastResponse.innerText || lastResponse.textContent;
-    },
-
     hasRateLimitError: () => {
         const toast = document.querySelector('#toast-root, .toast-container, [role="alert"]');
         if (!toast) return false;

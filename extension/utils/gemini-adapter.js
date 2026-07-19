@@ -3,8 +3,6 @@
 const INPUT = 'div[contenteditable="true"].ql-editor';
 const INPUT_ALT = 'rich-textarea div[contenteditable]';
 const SUBMIT = 'button[aria-label="Send message"]';
-const LOADING = 'model-response loading-indicator';
-const RESPONSE_CONTAINER = 'model-response';
 const ERROR_TOAST = 'snack-bar-container';
 
 const GeminiAdapter = {
@@ -31,13 +29,6 @@ const GeminiAdapter = {
         });
         const sendBtn = GeminiAdapter.getSubmit();
         return !stopBtn && !!sendBtn && !sendBtn.disabled;
-    },
-
-    getLastResponseText: () => {
-        const responses = document.querySelectorAll(RESPONSE_CONTAINER);
-        if (responses.length === 0) return "";
-        const lastResponse = responses[responses.length - 1];
-        return lastResponse.innerText || lastResponse.textContent;
     },
 
     hasRateLimitError: () => {
