@@ -15,7 +15,6 @@
 - **Floating Queue Panel:** Manage prompts directly on `gemini.google.com`, `chatgpt.com`, or `claude.ai` without opening a toolbar popup.
 - **Sequential Execution:** Enter a list of prompts. The extension types one, sends it, waits for the AI to finish generating the response, and then automatically sends the next one.
 - **Context Menu Integration:** Highlight text on any website, right-click, and instantly add it to your prompt queue.
-- **Rate-Limit Protection:** Stops the queue and requeues the current prompt when a supported site displays a recognized rate-limit message.
 - **Local Queue Storage:** Keeps queued prompts on the user's device with `chrome.storage.local`.
 
 ## 🛠 Installation
@@ -42,7 +41,6 @@ Currently, the extension is available for manual installation:
 1. **State Management:** Prompts are stored in `chrome.storage.local`, ensuring your queue persists across page reloads and browser restarts.
 2. **DOM Injection:** The extension interacts directly with the AI's frontend by dispatching synthetic `InputEvent`s to simulate real user typing.
 3. **Response Monitoring:** A `MutationObserver` watches the DOM for completion indicators without saving response content.
-4. **Safety Mechanisms:** The observer watches for recognized rate-limit messages. If one appears, the queue stops and safely requeues the current prompt.
 
 ## 📄 License
 

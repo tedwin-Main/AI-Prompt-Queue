@@ -85,8 +85,6 @@
 
 .apq-btn-add { background: #8ab4f8; color: #000; }
 .apq-btn-start { background: #81c995; color: #000; }
-.apq-btn-pause { background: #fdd663; color: #000; }
-.apq-btn-stop { background: #f28b82; color: #000; }
 
 #apq-queue-list {
     list-style: none;

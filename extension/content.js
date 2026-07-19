@@ -320,23 +320,6 @@ function waitForResponseComplete ()
             return;
         }
 
-        if ( window.AIAdapter.hasRateLimitError() )
-        {
-            observer.disconnect();
-            currentObserver = null;
-            console.error( "Rate limit detected." );
-            alert( "Rate limit detected. Queue stopped; click Send to Queue to retry." );
-            isRunning = false;
-            // Put message back
-            chrome.storage.local.get( [ 'queue' ], ( res ) =>
-            {
-                const q = res.queue || [];
-                q.unshift( currentPrompt );
-                chrome.storage.local.set( { queue: q } );
-            } );
-            return;
-        }
-
         if ( isWaiting ) return;
         isWaiting = true;
 

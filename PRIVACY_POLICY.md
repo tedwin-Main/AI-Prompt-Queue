@@ -12,7 +12,7 @@ AI Prompt Queue handles only the information needed for its user-facing features
 - Text the user explicitly selects and adds through the browser context menu.
 - Text currently entered or waiting in the floating-panel input.
 - Queue contents stored so they remain available across page reloads and browser restarts.
-- Response-completion and recognized rate-limit indicators processed temporarily from the supported website's page.
+- Response-completion indicators processed temporarily from the supported website's page.
 
 The extension does not save AI response content or browsing history. It does not import prompts from files or export prompts, queues, or responses to files. Prompts and selected text may contain website content, user-generated content, or personal communications depending on what the user chooses to submit.
 
@@ -22,7 +22,7 @@ The extension uses this information only to:
 
 - Maintain and process the user's prompt queue.
 - Submit queued prompts when the user starts the queue.
-- Detect when a response is complete or a rate limit occurs.
+- Detect when a response is complete before submitting the next queued prompt.
 
 ## Storage and retention
 

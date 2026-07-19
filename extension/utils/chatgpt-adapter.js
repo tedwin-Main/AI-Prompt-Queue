@@ -15,13 +15,6 @@ const ChatGPTAdapter = {
         const stopBtn = document.querySelector('button[aria-label="Stop generating"]');
         const sendBtn = ChatGPTAdapter.getSubmit();
         return !stopBtn && !!sendBtn;
-    },
-
-    hasRateLimitError: () => {
-        const toast = document.querySelector('#toast-root, .toast-container, [role="alert"]');
-        if (!toast) return false;
-        const text = toast.innerText.toLowerCase();
-        return text.includes("limit") || text.includes("too many requests") || text.includes("try again later") || text.includes("usage cap");
     }
 };
 

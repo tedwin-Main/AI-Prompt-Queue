@@ -59,9 +59,8 @@ Main features:
 - Add and review multiple prompts in a floating panel.
 - Send prompts sequentially and wait for each response to finish.
 - Remove individual queued prompts or clear the queue.
-- Use one context-aware button to add prompts, send the queue, and resume after a stop.
+- Use one context-aware button to add prompts and send the queue.
 - Add explicitly selected text using the browser context menu.
-- Stop and requeue the current prompt when a supported site displays a recognized rate-limit message.
 - Keep queued prompts locally across page reloads and browser restarts.
 
 Supported websites:
@@ -171,7 +170,7 @@ Creates the user-invoked “Add to AI Prompt Queue” context-menu command. Chro
 #### Host permission justification
 
 ```text
-Required only on https://chatgpt.com/*, https://gemini.google.com/*, and https://claude.ai/* to insert the floating queue panel, place user-approved queued text into the site's prompt composer, activate the site's send control, and observe response-completion and recognized rate-limit indicators so the queue proceeds safely. No other hosts receive injected content scripts or are read through host access. AI response content and browsing history are not stored.
+Required only on https://chatgpt.com/*, https://gemini.google.com/*, and https://claude.ai/* to insert the floating queue panel, place user-approved queued text into the site's prompt composer, activate the site's send control, and observe response-completion indicators before submitting the next queued prompt. No other hosts receive injected content scripts or are read through host access. AI response content and browsing history are not stored.
 ```
 
 Exact site patterns:
@@ -306,11 +305,10 @@ Repeat on ChatGPT, Gemini, and Claude:
 4. Add two harmless prompts and verify their order.
 5. Confirm the button changes to “Send to Queue” when the input is empty and prompts are queued.
 6. Confirm sequential sending and response-completion waiting.
-7. Confirm the same button can resume a stopped queue.
-8. Confirm individual deletion and Clear All work.
-9. Confirm collapse, expand, and dragging work.
-10. Reload the page and confirm queued prompts persist.
-11. Inspect `chrome://extensions` and the extension service-worker console for errors.
+7. Confirm individual deletion and Clear All work.
+8. Confirm collapse, expand, and dragging work.
+9. Reload the page and confirm queued prompts persist.
+10. Inspect `chrome://extensions` and the extension service-worker console for errors.
 
 Confirm the package does not contain:
 
@@ -335,7 +333,7 @@ Also confirm that the package contains no file picker, `FileReader`, download AP
 Suggested reviewer note:
 
 ```text
-Version 1.3 removes the unused scripting permission identified under Purple Potassium and further narrows the extension to a floating-panel-only experience. The toolbar popup and its activeTab permission were removed. File import, file export, and saved response history were also removed. The remaining storage and contextMenus permissions are actively used. Site access is limited to HTTPS on ChatGPT, Gemini, and Claude. AI response content and browsing history are not saved.
+Version 1.3 removes the unused scripting permission identified under Purple Potassium and narrows the extension to a floating-panel-only experience. The toolbar popup, activeTab permission, file import, file export, saved response history, and rate-limit message inspection were removed. The remaining storage and contextMenus permissions are actively used. Site access is limited to HTTPS on ChatGPT, Gemini, and Claude. The extension observes only response-completion controls needed for sequential sending; AI response content and browsing history are not saved.
 ```
 
 Do not appeal the old rejection. Submit version `1.3` as the corrected package.

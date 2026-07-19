@@ -3,7 +3,6 @@
 const INPUT = 'div[contenteditable="true"].ql-editor';
 const INPUT_ALT = 'rich-textarea div[contenteditable]';
 const SUBMIT = 'button[aria-label="Send message"]';
-const ERROR_TOAST = 'snack-bar-container';
 
 const GeminiAdapter = {
     hostPattern: 'gemini.google.com',
@@ -29,13 +28,6 @@ const GeminiAdapter = {
         });
         const sendBtn = GeminiAdapter.getSubmit();
         return !stopBtn && !!sendBtn && !sendBtn.disabled;
-    },
-
-    hasRateLimitError: () => {
-        const toast = document.querySelector(ERROR_TOAST);
-        if (!toast) return false;
-        const text = toast.innerText.toLowerCase();
-        return text.includes("limit") || text.includes("too many requests") || text.includes("try again later");
     }
 };
 

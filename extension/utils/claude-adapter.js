@@ -23,17 +23,6 @@ const ClaudeAdapter = {
         });
         const sendBtn = ClaudeAdapter.getSubmit();
         return !stopBtn && !!sendBtn;
-    },
-
-    hasRateLimitError: () => {
-        const alerts = document.querySelectorAll('.text-red-500, [role="alert"]');
-        for (let alert of alerts) {
-            const text = alert.innerText.toLowerCase();
-            if (text.includes("limit") || text.includes("too many requests") || text.includes("try again later") || text.includes("message limit")) {
-                return true;
-            }
-        }
-        return false;
     }
 };
 
