@@ -58,9 +58,10 @@ Main features:
 
 - Add and review multiple prompts in a floating panel.
 - Send prompts sequentially and wait for each response to finish.
+- Pause before the next queued prompt is sent, then resume from the same queue.
 - Remove individual queued prompts or clear the queue.
-- Use one context-aware button to add prompts and send the queue.
-- Add explicitly selected text using the browser context menu.
+- Use the Add to Queue button or Cmd/Ctrl + Enter to add prompts; adding the first prompt starts sequential sending automatically.
+- Place explicitly selected text in the floating-panel input using the browser context menu so the user can review it before adding it.
 - Keep queued prompts locally across page reloads and browser restarts.
 
 Supported websites:
@@ -134,7 +135,7 @@ Complete each visible required asset field:
 Recommended screenshots:
 
 1. Floating queue panel on ChatGPT with harmless sample prompts.
-2. Floating queue panel showing several queued prompts.
+2. Floating queue panel showing several queued prompts and the Pause control while running.
 3. Collapsed floating panel demonstrating the low-distraction state.
 4. Floating queue panel on Gemini.
 5. Floating queue panel on Claude.
@@ -256,14 +257,16 @@ Testing steps:
 
 1. Open one of the supported websites and sign in.
 2. Confirm the floating AI Prompt Queue panel appears automatically in the bottom-right corner. No toolbar-popup interaction is required.
-3. Enter a harmless prompt and confirm the button says “Add to Queue.” Click it and repeat with a second prompt.
-4. With the input empty, confirm the same button changes to “Send to Queue.” Click it.
-5. Confirm each prompt is submitted once and in order.
-6. Confirm the extension waits for the current response before sending the next prompt.
-7. Add queued prompts, reload the page, and confirm that they remain in the floating panel.
-8. Remove an individual queued prompt and test Clear All.
-9. Collapse and expand the floating panel from its header.
-10. Select harmless text on another webpage, right-click, and choose “Add to AI Prompt Queue.” Open a supported AI site and confirm the selected text appears in the floating-panel input.
+3. Enter a harmless prompt and confirm the button says “Add to Queue.” Press Cmd/Ctrl + Enter or click it.
+4. Confirm the first prompt is submitted automatically without clicking a separate start control.
+5. Add two more harmless prompts with Cmd/Ctrl + Enter while the first response is running.
+6. Confirm the Pause button appears while the queue is running. Click “Pause” and confirm the button changes to “Resume.”
+7. Confirm the current response finishes and both remaining prompts stay queued while paused.
+8. Click “Resume.” While the AI service's stop control is visible for the second prompt, confirm the third prompt remains queued. Confirm the third prompt sends only after the stop control disappears.
+9. Start a new queue, pause it, add another prompt with Cmd/Ctrl + Enter, reload the page, and confirm the queued prompt remains in the floating panel.
+10. Remove an individual queued prompt and test Clear All.
+11. Collapse and expand the floating panel from its header.
+12. Select harmless text on another webpage, right-click, and choose “Add to AI Prompt Queue.” Open a supported AI site and confirm the selected text appears in the floating-panel input.
 
 The extension does not save AI response content or browsing history. It does not import or export files and does not use remote code, developer servers, analytics, or advertising.
 ```
@@ -301,14 +304,15 @@ Repeat on ChatGPT, Gemini, and Claude:
 
 1. Confirm the floating panel appears automatically.
 2. Confirm clicking the toolbar icon does not open the removed popup.
-3. Confirm the single button says “Add to Queue” while the input contains text.
-4. Add two harmless prompts and verify their order.
-5. Confirm the button changes to “Send to Queue” when the input is empty and prompts are queued.
-6. Confirm sequential sending and response-completion waiting.
-7. Confirm individual deletion and Clear All work.
-8. Confirm collapse, expand, and dragging work.
-9. Reload the page and confirm queued prompts persist.
-10. Inspect `chrome://extensions` and the extension service-worker console for errors.
+3. Confirm the primary button says “Add to Queue” while the input contains text.
+4. Add one harmless prompt with Cmd/Ctrl + Enter and verify sending begins immediately.
+5. Add two more harmless prompts while the first response is running and verify their order.
+6. Pause during generation and confirm both remaining prompts stay queued after the current response finishes.
+7. Resume, then confirm the third prompt remains queued while the visible stop control indicates generation of the second response and sends only after that control disappears.
+8. Confirm individual deletion and Clear All work.
+9. Confirm collapse, expand, and dragging work.
+10. While paused, add another prompt with Cmd/Ctrl + Enter, reload the page, and confirm the queued prompt persists.
+11. Inspect `chrome://extensions` and the extension service-worker console for errors.
 
 Confirm the package does not contain:
 
@@ -333,7 +337,7 @@ Also confirm that the package contains no file picker, `FileReader`, download AP
 Suggested reviewer note:
 
 ```text
-Version 1.3 removes the unused scripting permission identified under Purple Potassium and narrows the extension to a floating-panel-only experience. The toolbar popup, activeTab permission, file import, file export, saved response history, and rate-limit message inspection were removed. The remaining storage and contextMenus permissions are actively used. Site access is limited to HTTPS on ChatGPT, Gemini, and Claude. The extension observes only response-completion controls needed for sequential sending; AI response content and browsing history are not saved.
+Version 1.3 removes the unused scripting permission identified under Purple Potassium and narrows the extension to a floating-panel-only experience. The toolbar popup, activeTab permission, file import, file export, saved response history, and rate-limit message inspection were removed. The remaining storage and contextMenus permissions are actively used. Site access is limited to HTTPS on ChatGPT, Gemini, and Claude. The extension observes only response-completion controls needed for sequential sending; Pause and Resume only hold or continue the local queue. AI response content and browsing history are not saved.
 ```
 
 Do not appeal the old rejection. Submit version `1.3` as the corrected package.

@@ -21,18 +21,18 @@ The extension does not save AI response content or browsing history. It does not
 The extension uses this information only to:
 
 - Maintain and process the user's prompt queue.
-- Submit queued prompts when the user starts the queue.
+- Submit prompts when the user adds them, beginning with the first prompt and continuing sequentially unless the user pauses the queue.
 - Detect when a response is complete before submitting the next queued prompt.
 
 ## Storage and retention
 
 Queued prompts and current floating-panel input, including selected text, are stored locally on the user's device using `chrome.storage.local`. The extension does not create or retain a response-history database, and it does not read or create TXT or JSON files. The developer does not operate a server that receives or stores extension data.
 
-Locally stored data remains until the user removes or clears the queue, clears the extension's browser storage, or uninstalls the extension.
+Locally stored prompts remain until they are submitted, the user removes or clears them, the user clears the extension's browser storage, or the extension is uninstalled.
 
 ## Data transmission and sharing
 
-When the user starts a queue, each prompt is submitted to the supported AI service on the page where the extension's floating panel is running: Google Gemini, ChatGPT, or Claude. That transmission is required to provide the extension's core function and is governed by the selected service's own terms and privacy policy.
+When the user adds a prompt, it is submitted to the supported AI service on the page where the extension's floating panel is running: Google Gemini, ChatGPT, or Claude. Additional queued prompts are submitted sequentially after each response completes unless the user pauses the queue. Pausing does not interrupt the current AI response. That transmission is required to provide the extension's core function and is governed by the selected service's own terms and privacy policy.
 
 AI Prompt Queue does not transmit user data to the developer or developer-controlled servers. The extension does not sell user data, use it for advertising or analytics, share it with data brokers, or permit the developer or other humans to read it.
 
@@ -44,6 +44,7 @@ The extension limits access to the supported HTTPS websites listed in its manife
 
 Users can:
 
+- Pause the queue before the next prompt is submitted and resume it later.
 - Remove individual queued prompts or clear the queue.
 - Clear text waiting in the floating-panel input.
 - Delete all extension data by clearing the extension's storage or uninstalling the extension.

@@ -3,7 +3,10 @@
 console.log( "AI Prompt Queue content script loaded" );
 
 let isRunning = false;
+let isPaused = false;
+let isWaitingForResponse = false;
 let currentObserver = null;
+let nextPromptTimer = null;
 let currentPrompt = "";
 let panelInjected = false;
 const PROMPT_DELAY_SECONDS = 3;
@@ -23,9 +26,10 @@ function injectFloatingPanel ()
                 <span id="apq-toggle">-</span>
             </div>
             <div id="apq-content">
-                <textarea id="apq-input" placeholder="Enter a prompt&#10;Click Add to Queue or press Cmd/Ctrl + Enter&#10;Repeat to add more prompts"></textarea>
+                <textarea id="apq-input" placeholder="Enter a prompt&#10;Click Add to Queue or press Cmd/Ctrl + Enter to send&#10;Repeat to add more prompts"></textarea>
                 <div id="apq-controls">
                     <button id="apq-action-btn" class="apq-btn-add">Add to Queue</button>
+                    <button id="apq-pause-btn" class="apq-btn-pause" hidden>Pause</button>
                 </div>
                 <div id="apq-queue-header">
                     <span id="apq-queue-label">Queued</span>
@@ -106,6 +110,7 @@ function injectFloatingPanel ()
                 {
                     input.value = '';
                     updatePanelUI();
+                    startQueue();
                 } );
             } );
         } else
@@ -115,6 +120,11 @@ function injectFloatingPanel ()
     };
 
     document.getElementById( 'apq-action-btn' ).onclick = actionFn;
+    document.getElementById( 'apq-pause-btn' ).onclick = () =>
+    {
+        if ( isPaused ) resumeQueue();
+        else pauseQueue();
+    };
 
     document.getElementById( 'apq-clear-btn' ).onclick = () =>
     {
@@ -166,6 +176,7 @@ function updatePanelUI ()
         const queueHeader = document.getElementById( 'apq-queue-header' );
         const emptyState = document.getElementById( 'apq-empty' );
         const actionBtn = document.getElementById( 'apq-action-btn' );
+        const pauseBtn = document.getElementById( 'apq-pause-btn' );
 
         if ( !list ) return;
 
@@ -175,8 +186,15 @@ function updatePanelUI ()
         {
             const hasInput = document.getElementById( 'apq-input' )?.value.trim().length > 0;
             actionBtn.disabled = isRunning || ( !hasInput && queue.length === 0 );
-            actionBtn.innerText = isRunning ? 'Running…' : hasInput ? 'Add to Queue' : queue.length > 0 ? 'Send to Queue' : 'Add to Queue';
+            actionBtn.innerText = isPaused ? 'Paused' : isRunning ? 'Running…' : hasInput ? 'Add to Queue' : queue.length > 0 ? 'Send to Queue' : 'Add to Queue';
             actionBtn.className = hasInput ? 'apq-btn-add' : 'apq-btn-start';
+        }
+
+        if ( pauseBtn )
+        {
+            pauseBtn.hidden = !isRunning;
+            pauseBtn.innerText = isPaused ? 'Resume' : 'Pause';
+            pauseBtn.className = isPaused ? 'apq-btn-resume' : 'apq-btn-pause';
         }
 
         // Update badge count
@@ -232,29 +250,79 @@ function startQueue ()
     if ( isRunning ) return;
     console.log( "Starting queue processing..." );
     isRunning = true;
+    isPaused = false;
+    isWaitingForResponse = false;
     updatePanelUI();
     processNextInQueue();
 }
 
+function pauseQueue ()
+{
+    if ( !isRunning || isPaused ) return;
+    isPaused = true;
+
+    if ( nextPromptTimer )
+    {
+        clearTimeout( nextPromptTimer );
+        nextPromptTimer = null;
+    }
+
+    console.log( "Queue paused." );
+    updatePanelUI();
+}
+
+function resumeQueue ()
+{
+    if ( !isRunning || !isPaused ) return;
+    isPaused = false;
+    console.log( "Queue resumed." );
+    updatePanelUI();
+
+    if ( !isWaitingForResponse ) processNextInQueue();
+}
+
 function processNextInQueue ()
 {
-    if ( !isRunning ) return;
+    if ( !isRunning || isPaused || isWaitingForResponse ) return;
 
     chrome.storage.local.get( [ 'queue' ], ( result ) =>
     {
+        if ( !isRunning || isPaused || isWaitingForResponse ) return;
+
         const queue = result.queue || [];
 
         if ( queue.length === 0 )
         {
             console.log( "Queue is empty. Finished." );
             isRunning = false;
+            isPaused = false;
+            isWaitingForResponse = false;
             updatePanelUI();
             return;
         }
 
+        isWaitingForResponse = true;
         currentPrompt = queue.shift();
         chrome.storage.local.set( { queue: queue }, () =>
         {
+            if ( isPaused )
+            {
+                const pausedPrompt = currentPrompt;
+                chrome.storage.local.get( [ 'queue' ], ( pausedResult ) =>
+                {
+                    const pausedQueue = pausedResult.queue || [];
+                    pausedQueue.unshift( pausedPrompt );
+                    chrome.storage.local.set( { queue: pausedQueue }, () =>
+                    {
+                        currentPrompt = "";
+                        isWaitingForResponse = false;
+                        updatePanelUI();
+                        if ( isRunning && !isPaused ) processNextInQueue();
+                    } );
+                } );
+                return;
+            }
+
             sendMessageToAI( currentPrompt );
         } );
     } );
@@ -263,6 +331,7 @@ function processNextInQueue ()
 function sendMessageToAI ( message )
 {
     if ( !isRunning ) return;
+    isWaitingForResponse = true;
 
     const inputArea = window.AIAdapter.getInput();
     if ( !inputArea )
@@ -293,6 +362,8 @@ function sendMessageToAI ( message )
         {
             console.error( "Submit button not found or disabled." );
             isRunning = false;
+            isPaused = false;
+            isWaitingForResponse = false;
             chrome.storage.local.get( [ 'queue' ], ( res ) =>
             {
                 const q = res.queue || [];
@@ -308,37 +379,76 @@ function waitForResponseComplete ()
     if ( !isRunning ) return;
 
     const targetNode = document.body;
-    const config = { childList: true, subtree: true, characterData: true };
+    const config = {
+        childList: true,
+        subtree: true,
+        characterData: true,
+        attributes: true,
+        attributeFilter: [ 'aria-label', 'class', 'disabled', 'hidden', 'style' ]
+    };
 
-    let isWaiting = false;
+    let sawGenerating = false;
+    let settled = false;
+    let poller = null;
+    let observer = null;
 
-    currentObserver = new MutationObserver( ( mutationsList, observer ) =>
+    const cleanup = () =>
     {
-        if ( !isRunning )
+        if ( observer ) observer.disconnect();
+        if ( poller ) clearInterval( poller );
+        currentObserver = null;
+    };
+
+    const finish = () =>
+    {
+        if ( settled ) return;
+        settled = true;
+        cleanup();
+        isWaitingForResponse = false;
+
+        if ( isPaused )
         {
-            observer.disconnect();
+            updatePanelUI();
             return;
         }
 
-        if ( isWaiting ) return;
-        isWaiting = true;
-
-        setTimeout( () =>
+        nextPromptTimer = setTimeout( () =>
         {
-            isWaiting = false;
-            if ( window.AIAdapter.isResponseComplete() )
-            {
-                console.log( "Response complete." );
-                observer.disconnect();
-                currentObserver = null;
+            nextPromptTimer = null;
+            processNextInQueue();
+        }, PROMPT_DELAY_SECONDS * 1000 );
+    };
 
-                setTimeout( () =>
-                {
-                    processNextInQueue();
-                }, PROMPT_DELAY_SECONDS * 1000 );
-            }
-        }, 1000 );
+    const checkCompletion = () =>
+    {
+        if ( !isRunning )
+        {
+            cleanup();
+            isWaitingForResponse = false;
+            return;
+        }
+
+        if ( window.AIAdapter.isGenerating() )
+        {
+            sawGenerating = true;
+            return;
+        }
+
+        // Advance only after a visible stop control appeared and disappeared.
+        // Send-button state is irrelevant while the chatbot input is empty.
+        if ( !sawGenerating ) return;
+
+        console.log( "Response complete." );
+        finish();
+    };
+
+    observer = new MutationObserver( () =>
+    {
+        checkCompletion();
     } );
 
-    currentObserver.observe( targetNode, config );
+    currentObserver = observer;
+    observer.observe( targetNode, config );
+    poller = setInterval( checkCompletion, 250 );
+    checkCompletion();
 }
