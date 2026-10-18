@@ -25,7 +25,7 @@ Currently, the extension is available for manual installation:
 1. Download or clone this repository to your local machine.
 2. Open Google Chrome and navigate to `chrome://extensions/`.
 3. Enable **"Developer mode"** in the top right corner.
-4. Click **"Load unpacked"** and select the `extension` folder from this repository.
+4. Click **"Load unpacked"** and select the `frontend/extension` folder from this repository.
 5. Open a supported AI website. The floating queue panel appears automatically.
 
 ## 🚀 Usage
