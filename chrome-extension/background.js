@@ -1,10 +1,20 @@
-// background.js
+/**
+ * FILE: chrome-extension/background.js
+ * PURPOSE: extension lifecycle, initial storage defaults, context menu actions
+ * UI: browser background service worker
+ * USED BY: chrome-extension/manifest.json
+ * KEY EXPORTS: none
+ */
 
+console.log("AI Prompt Queue service worker loaded.");
+
+// Extension > Background > Lifecycle: initialize storage and menus
 chrome.runtime.onInstalled.addListener(() => {
   console.log("AI Prompt Queue installed.");
 
   const defaults = {
-    queue: []
+    queue: [],
+    panelSize: "full"
   };
 
   chrome.storage.local.get(Object.keys(defaults), (stored) => {
@@ -31,11 +41,12 @@ chrome.runtime.onInstalled.addListener(() => {
   });
 });
 
+// Extension > Background > Context Menu: capture highlighted prompt text
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId === "addToQueue") {
     chrome.storage.local.get(['pendingText'], (result) => {
       const current = result.pendingText || "";
-      const newText = current ? current + "\\n" + info.selectionText : info.selectionText;
+      const newText = current ? current + "\n" + info.selectionText : info.selectionText;
       chrome.storage.local.set({ pendingText: newText });
     });
   }

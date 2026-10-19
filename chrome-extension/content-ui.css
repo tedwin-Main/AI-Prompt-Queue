@@ -1,0 +1,331 @@
+/**
+ * FILE: chrome-extension/content-ui.css
+ * PURPOSE: styles for floating prompt queue panel, compact mode, color palette
+ * UI: Chat > Prompt Queue > Floating Panel
+ * USED BY: chrome-extension/manifest.json
+ * KEY EXPORTS: none
+ */
+
+/* Chat > Prompt Queue > Floating Panel: container styling positioned beside chatbar */
+#apq-panel {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 320px;
+    background: rgba(22, 22, 26, 0.97);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    color: #d8dae0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    z-index: 999999;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: width 0.25s ease, height 0.25s ease;
+}
+
+/* Chat > Prompt Queue > Floating Panel: collapsed mode */
+#apq-panel.collapsed {
+    height: 40px;
+}
+
+/* Chat > Prompt Queue > Content: hide when collapsed */
+#apq-panel.collapsed #apq-content {
+    display: none;
+}
+
+/* Chat > Prompt Queue > Queue Section: hide in compact mode */
+#apq-panel.compact #apq-queue-section {
+    display: none;
+}
+
+/* Chat > Prompt Queue > Queue Fallback: ensure hide in compact mode */
+#apq-panel.compact #apq-queue-header,
+#apq-panel.compact #apq-queue-list,
+#apq-panel.compact #apq-empty {
+    display: none !important;
+}
+
+/* Chat > Prompt Queue > Header: drag handle and controls */
+#apq-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    cursor: move;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: -0.2px;
+    white-space: nowrap;
+    user-select: none;
+    transition: background 0.15s ease;
+}
+
+#apq-header:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+/* Chat > Prompt Queue > Title: label with badge */
+#apq-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Chat > Prompt Queue > Toggle: cycle size button */
+#apq-toggle {
+    font-size: 15px;
+    padding: 2px 6px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #9da2ad;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: color 0.15s ease, background 0.15s ease;
+}
+
+#apq-toggle:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* Chat > Prompt Queue > Badge: count indicator */
+#apq-badge {
+    background: #7c9fff;
+    color: #0d1117;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 10px;
+    padding: 1px 7px;
+    display: none;
+    vertical-align: middle;
+}
+
+/* Chat > Prompt Queue > Content: inner body wrapper */
+#apq-content {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Chat > Prompt Queue > Input: prompt textarea */
+#apq-input {
+    width: 100%;
+    height: 64px;
+    background: rgba(0, 0, 0, 0.35);
+    color: #f0f2f5;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 9px 10px;
+    box-sizing: border-box;
+    resize: none;
+    font-family: inherit;
+    font-size: 12px;
+    line-height: 1.4;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+#apq-input::placeholder {
+    color: #70757f;
+}
+
+#apq-input:focus {
+    border-color: #7c9fff;
+    box-shadow: 0 0 0 2px rgba(124, 159, 255, 0.2);
+    outline: none;
+}
+
+/* Chat > Prompt Queue > Controls: action button row */
+#apq-controls {
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+}
+
+#apq-controls button {
+    flex: 1;
+    padding: 7px 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 12px;
+    font-family: inherit;
+    transition: background 0.15s ease, transform 0.1s ease, opacity 0.15s ease;
+}
+
+#apq-controls button:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+
+#apq-controls button:not(:disabled):active {
+    transform: scale(0.97);
+}
+
+.apq-btn-add {
+    background: #7c9fff;
+    color: #0d1117;
+}
+
+.apq-btn-add:not(:disabled):hover {
+    background: #94b2ff;
+}
+
+.apq-btn-start {
+    background: #6ecf8a;
+    color: #0a1e11;
+}
+
+.apq-btn-start:not(:disabled):hover {
+    background: #81db9b;
+}
+
+.apq-btn-pause {
+    background: #f0c556;
+    color: #261a00;
+}
+
+.apq-btn-pause:not(:disabled):hover {
+    background: #ffd369;
+}
+
+.apq-btn-resume {
+    background: #6ecf8a;
+    color: #0a1e11;
+}
+
+.apq-btn-resume:not(:disabled):hover {
+    background: #81db9b;
+}
+
+#apq-pause-btn[hidden] {
+    display: none;
+}
+
+/* Chat > Prompt Queue > Queue Section: list container */
+#apq-queue-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Chat > Prompt Queue > Queue Header: label and clear button */
+#apq-queue-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #8b909a;
+    padding-top: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+/* Chat > Prompt Queue > Clear Button: clear all queued items */
+#apq-clear-btn {
+    background: none;
+    border: none;
+    color: #ff6b6b;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: none;
+    letter-spacing: normal;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+#apq-clear-btn:hover {
+    background: rgba(255, 107, 107, 0.14);
+    color: #ff8585;
+}
+
+/* Chat > Prompt Queue > Queue List: list of queued prompts */
+#apq-queue-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 150px;
+    overflow-y: auto;
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+#apq-queue-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+#apq-queue-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+}
+
+/* Chat > Prompt Queue > Item: single prompt row */
+.apq-item {
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    padding: 6px 8px;
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.12s ease;
+}
+
+.apq-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.apq-item-num {
+    color: #7a808c;
+    font-size: 11px;
+    min-width: 20px;
+    flex-shrink: 0;
+}
+
+.apq-item-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 82%;
+    color: #e4e7ec;
+}
+
+.apq-item-del {
+    color: #ff6b6b;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-size: 11px;
+    line-height: 1;
+    transition: background 0.12s ease, color 0.12s ease;
+}
+
+.apq-item-del:hover {
+    background: rgba(255, 107, 107, 0.14);
+    color: #ff8585;
+}
+
+/* Chat > Prompt Queue > Empty State: empty message */
+#apq-empty {
+    text-align: center;
+    font-size: 12px;
+    color: #636873;
+    padding: 8px 0;
+}

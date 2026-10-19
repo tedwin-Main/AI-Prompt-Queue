@@ -1,4 +1,10 @@
-// content.js
+/**
+ * FILE: chrome-extension/content.js
+ * PURPOSE: manage prompt queue lifecycle, automation, injected floating panel
+ * UI: Chat > Prompt Queue > Floating Panel
+ * USED BY: manifest.json content scripts
+ * KEY EXPORTS: none
+ */
 
 console.log( "AI Prompt Queue content script loaded" );
 
@@ -11,7 +17,7 @@ let currentPrompt = "";
 let panelInjected = false;
 const PROMPT_DELAY_SECONDS = 3;
 
-// Inject UI on load
+// Chat > Floating Panel > Injection: init on load
 injectFloatingPanel();
 
 function injectFloatingPanel ()
@@ -23,7 +29,7 @@ function injectFloatingPanel ()
         <div id="apq-panel">
             <div id="apq-header">
                 <span id="apq-title">AI Prompt Queue <span id="apq-badge">0</span></span>
-                <span id="apq-toggle">-</span>
+                <span id="apq-toggle" title="Cycle size: Full, Compact, Minimized">⊟</span>
             </div>
             <div id="apq-content">
                 <textarea id="apq-input" placeholder="Enter a prompt&#10;Click Add to Queue or press Cmd/Ctrl + Enter to send&#10;Repeat to add more prompts"></textarea>
@@ -31,12 +37,14 @@ function injectFloatingPanel ()
                     <button id="apq-action-btn" class="apq-btn-add">Add to Queue</button>
                     <button id="apq-pause-btn" class="apq-btn-pause" hidden>Pause</button>
                 </div>
-                <div id="apq-queue-header">
-                    <span id="apq-queue-label">Queued</span>
-                    <button id="apq-clear-btn">Clear All</button>
+                <div id="apq-queue-section">
+                    <div id="apq-queue-header">
+                        <span id="apq-queue-label">Queued</span>
+                        <button id="apq-clear-btn">Clear All</button>
+                    </div>
+                    <ul id="apq-queue-list"></ul>
+                    <div id="apq-empty">No prompts in queue</div>
                 </div>
-                <ul id="apq-queue-list"></ul>
-                <div id="apq-empty">No prompts in queue</div>
             </div>
         </div>
     `;
@@ -89,11 +97,27 @@ function injectFloatingPanel ()
         isDragging = false;
     } );
 
+    // Chat > Prompt Queue > Header: cycle size modes and persist
     header.onclick = () =>
     {
         if ( moved ) return;
-        panel.classList.toggle( 'collapsed' );
-        document.getElementById( 'apq-toggle' ).innerText = panel.classList.contains( 'collapsed' ) ? '+' : '-';
+
+        let nextSize = 'full';
+        if ( !panel.classList.contains( 'compact' ) && !panel.classList.contains( 'collapsed' ) )
+        {
+            nextSize = 'compact';
+        }
+        else if ( panel.classList.contains( 'compact' ) )
+        {
+            nextSize = 'collapsed';
+        }
+        else
+        {
+            nextSize = 'full';
+        }
+
+        applyPanelSize( nextSize );
+        chrome.storage.local.set( { panelSize: nextSize } );
     };
 
     const actionFn = () =>
@@ -142,29 +166,67 @@ function injectFloatingPanel ()
 
     // Initial render
     updatePanelUI();
-    chrome.storage.local.get(['pendingText'], (res) => {
-        if (res.pendingText) {
-            document.getElementById('apq-input').value = res.pendingText;
+    chrome.storage.local.get( [ 'pendingText', 'panelSize' ], ( res ) =>
+    {
+        if ( res.pendingText )
+        {
+            document.getElementById( 'apq-input' ).value = res.pendingText;
             updatePanelUI();
         }
-    });
+        if ( res.panelSize )
+        {
+            applyPanelSize( res.panelSize );
+        }
+    } );
 
-    document.getElementById('apq-input').addEventListener('input', (e) => {
-        chrome.storage.local.set({ pendingText: e.target.value });
+    document.getElementById( 'apq-input' ).addEventListener( 'input', ( e ) =>
+    {
+        chrome.storage.local.set( { pendingText: e.target.value } );
         updatePanelUI();
-    });
+    } );
 
     // Listen to storage changes to keep UI in sync
     chrome.storage.onChanged.addListener( ( changes ) =>
     {
-        if (changes.pendingText !== undefined) {
-            const input = document.getElementById('apq-input');
-            if (input && document.activeElement !== input) {
+        if ( changes.pendingText !== undefined )
+        {
+            const input = document.getElementById( 'apq-input' );
+            if ( input && document.activeElement !== input )
+            {
                 input.value = changes.pendingText.newValue || "";
             }
         }
+        if ( changes.panelSize !== undefined )
+        {
+            applyPanelSize( changes.panelSize.newValue || 'full' );
+        }
         updatePanelUI();
     } );
+}
+
+// Chat > Prompt Queue > Panel: apply size mode and update toggle indicator
+function applyPanelSize ( size )
+{
+    const panel = document.getElementById( 'apq-panel' );
+    const toggle = document.getElementById( 'apq-toggle' );
+    if ( !panel ) return;
+
+    panel.classList.remove( 'compact', 'collapsed' );
+
+    if ( size === 'compact' )
+    {
+        panel.classList.add( 'compact' );
+        if ( toggle ) toggle.innerText = '⊡';
+    }
+    else if ( size === 'collapsed' )
+    {
+        panel.classList.add( 'collapsed' );
+        if ( toggle ) toggle.innerText = '⊞';
+    }
+    else
+    {
+        if ( toggle ) toggle.innerText = '⊟';
+    }
 }
 
 function updatePanelUI ()
