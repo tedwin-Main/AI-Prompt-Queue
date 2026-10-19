@@ -1,4 +1,4 @@
-// utils/gemini-adapter.js
+// components/gemini-adapter.js
 
 const INPUT = 'div[contenteditable="true"].ql-editor';
 const INPUT_ALT = 'rich-textarea div[contenteditable]';

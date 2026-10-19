@@ -1,4 +1,4 @@
-// utils/claude-adapter.js
+// components/claude-adapter.js
 
 const isVisible = ( element ) =>
 {

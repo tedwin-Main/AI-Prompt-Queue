@@ -1,4 +1,4 @@
-// utils/chatgpt-adapter.js
+// components/chatgpt-adapter.js
 
 const isVisible = ( element ) =>
 {
