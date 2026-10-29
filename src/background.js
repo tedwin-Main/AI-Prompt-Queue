@@ -1,8 +1,8 @@
 /**
- * FILE: chrome-extension/background.js
+ * FILE: src/background.js
  * PURPOSE: extension lifecycle, initial storage defaults, context menu actions
  * UI: browser background service worker
- * USED BY: chrome-extension/manifest.json
+ * USED BY: src/manifest.json
  * KEY EXPORTS: none
  */
 

@@ -18,18 +18,18 @@
   "content_scripts": [
     {
       "matches": ["https://gemini.google.com/*"],
-      "css": ["content-ui.css"],
-      "js": ["components/gemini-adapter.js", "content.js"]
+      "css": ["features/queue-panel/content-ui.css"],
+      "js": ["features/chat-adapters/gemini-adapter.js", "features/queue-panel/content.js"]
     },
     {
       "matches": ["https://chatgpt.com/*"],
-      "css": ["content-ui.css"],
-      "js": ["components/chatgpt-adapter.js", "content.js"]
+      "css": ["features/queue-panel/content-ui.css"],
+      "js": ["features/chat-adapters/chatgpt-adapter.js", "features/queue-panel/content.js"]
     },
     {
       "matches": ["https://claude.ai/*"],
-      "css": ["content-ui.css"],
-      "js": ["components/claude-adapter.js", "content.js"]
+      "css": ["features/queue-panel/content-ui.css"],
+      "js": ["features/chat-adapters/claude-adapter.js", "features/queue-panel/content.js"]
     }
   ]
 }

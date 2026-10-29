@@ -1,8 +1,8 @@
 /**
- * FILE: chrome-extension/content-ui.css
+ * FILE: src/features/queue-panel/content-ui.css
  * PURPOSE: styles for floating prompt queue panel, compact mode, color palette
  * UI: Chat > Prompt Queue > Floating Panel
- * USED BY: chrome-extension/manifest.json
+ * USED BY: src/manifest.json
  * KEY EXPORTS: none
  */
 

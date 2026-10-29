@@ -1,5 +1,5 @@
 /**
- * FILE: chrome-extension/content.js
+ * FILE: src/features/queue-panel/content.js
  * PURPOSE: manage prompt queue lifecycle, automation, injected floating panel
  * UI: Chat > Prompt Queue > Floating Panel
  * USED BY: manifest.json content scripts

@@ -9,7 +9,9 @@
 </div>
 
 ## Map
-- `chrome-extension/`: Chrome MV3 extension: queue panel; `components/` site adapters; `images/` icons. Status: active
+- `src/`: Chrome MV3 extension root (manifest, background, icons). Status: active
+- `src/features/queue-panel/`: floating queue panel + automation. Status: active
+- `src/features/chat-adapters/`: ChatGPT, Claude, Gemini page adapters. Status: active
 - `docs/`: Chrome Web Store submission. Status: active
 
 
@@ -30,7 +32,7 @@ Currently, the extension is available for manual installation:
 1. Download or clone this repository to your local machine.
 2. Open Google Chrome and navigate to `chrome://extensions/`.
 3. Enable **"Developer mode"** in the top right corner.
-4. Click **"Load unpacked"** and select the `chrome-extension` folder from this repository.
+4. Click **"Load unpacked"** and select the `src` folder from this repository.
 5. Open a supported AI website. The floating queue panel appears automatically.
 
 ## 🚀 Usage

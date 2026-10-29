@@ -1,4 +1,4 @@
-// components/chatgpt-adapter.js
+// features/chat-adapters/claude-adapter.js
 
 const isVisible = ( element ) =>
 {
@@ -10,9 +10,11 @@ const isVisible = ( element ) =>
 const getVisibleStopButton = () =>
 {
     const selectors = [
-        'button[data-testid="stop-button"]',
+        'button[data-testid*="stop" i]',
+        'button[data-test-id*="stop" i]',
         'button[aria-label*="stop generating" i]',
-        'button[aria-label*="stop response" i]'
+        'button[aria-label*="stop response" i]',
+        'button[aria-label="stop" i]'
     ];
     const directMatch = Array.from( document.querySelectorAll( selectors.join( ',' ) ) ).find( isVisible );
     if ( directMatch ) return directMatch;
@@ -20,29 +22,28 @@ const getVisibleStopButton = () =>
     return Array.from( document.querySelectorAll( 'button' ) ).filter( isVisible ).find( ( button ) =>
     {
         const label = ( button.getAttribute( 'aria-label' ) || '' ).toLowerCase();
-        const testId = ( button.getAttribute( 'data-testid' ) || '' ).toLowerCase();
+        const testId = ( button.getAttribute( 'data-testid' ) || button.getAttribute( 'data-test-id' ) || '' ).toLowerCase();
         return label.includes( 'stop' ) || testId.includes( 'stop' );
     } ) || null;
 };
 
-const ChatGPTAdapter = {
-    hostPattern: 'chatgpt.com',
+const ClaudeAdapter = {
+    hostPattern: 'claude.ai',
     
     getInput: () => {
-        return document.querySelector('#prompt-textarea');
+        return document.querySelector('div[contenteditable="true"]');
     },
     
     getSubmit: () => {
-        const selectors = [
-            'button[data-testid="send-button"]',
-            'button[aria-label="Send prompt"]',
-            'button[aria-label="Send message"]'
-        ];
-        return Array.from( document.querySelectorAll( selectors.join( ',' ) ) ).find( isVisible ) || null;
+        const buttons = Array.from(document.querySelectorAll('button'));
+        return buttons.find(b => {
+            const label = b.getAttribute('aria-label') || '';
+            return isVisible( b ) && label.toLowerCase().includes('send message');
+        }) || null;
     },
     
     isGenerating: () => !!getVisibleStopButton(),
     isResponseComplete: () => !getVisibleStopButton()
 };
 
-window.AIAdapter = ChatGPTAdapter;
+window.AIAdapter = ClaudeAdapter;

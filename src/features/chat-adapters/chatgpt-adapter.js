@@ -1,4 +1,4 @@
-// components/claude-adapter.js
+// features/chat-adapters/chatgpt-adapter.js
 
 const isVisible = ( element ) =>
 {
@@ -10,11 +10,9 @@ const isVisible = ( element ) =>
 const getVisibleStopButton = () =>
 {
     const selectors = [
-        'button[data-testid*="stop" i]',
-        'button[data-test-id*="stop" i]',
+        'button[data-testid="stop-button"]',
         'button[aria-label*="stop generating" i]',
-        'button[aria-label*="stop response" i]',
-        'button[aria-label="stop" i]'
+        'button[aria-label*="stop response" i]'
     ];
     const directMatch = Array.from( document.querySelectorAll( selectors.join( ',' ) ) ).find( isVisible );
     if ( directMatch ) return directMatch;
@@ -22,28 +20,29 @@ const getVisibleStopButton = () =>
     return Array.from( document.querySelectorAll( 'button' ) ).filter( isVisible ).find( ( button ) =>
     {
         const label = ( button.getAttribute( 'aria-label' ) || '' ).toLowerCase();
-        const testId = ( button.getAttribute( 'data-testid' ) || button.getAttribute( 'data-test-id' ) || '' ).toLowerCase();
+        const testId = ( button.getAttribute( 'data-testid' ) || '' ).toLowerCase();
         return label.includes( 'stop' ) || testId.includes( 'stop' );
     } ) || null;
 };
 
-const ClaudeAdapter = {
-    hostPattern: 'claude.ai',
+const ChatGPTAdapter = {
+    hostPattern: 'chatgpt.com',
     
     getInput: () => {
-        return document.querySelector('div[contenteditable="true"]');
+        return document.querySelector('#prompt-textarea');
     },
     
     getSubmit: () => {
-        const buttons = Array.from(document.querySelectorAll('button'));
-        return buttons.find(b => {
-            const label = b.getAttribute('aria-label') || '';
-            return isVisible( b ) && label.toLowerCase().includes('send message');
-        }) || null;
+        const selectors = [
+            'button[data-testid="send-button"]',
+            'button[aria-label="Send prompt"]',
+            'button[aria-label="Send message"]'
+        ];
+        return Array.from( document.querySelectorAll( selectors.join( ',' ) ) ).find( isVisible ) || null;
     },
     
     isGenerating: () => !!getVisibleStopButton(),
     isResponseComplete: () => !getVisibleStopButton()
 };
 
-window.AIAdapter = ClaudeAdapter;
+window.AIAdapter = ChatGPTAdapter;
