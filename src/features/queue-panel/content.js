@@ -1,11 +1,4 @@
 // Manages prompt queue lifecycle, automation, and injected floating panel.
-/**
- * FILE: src/features/queue-panel/content.js
- * PURPOSE: manage prompt queue lifecycle, automation, injected floating panel
- * UI: Chat > Prompt Queue > Floating Panel
- * USED BY: manifest.json content scripts
- * KEY EXPORTS: none
- */
 
 console.log( "AI Prompt Queue content script loaded" );
 

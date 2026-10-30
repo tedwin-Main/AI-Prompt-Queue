@@ -1,11 +1,4 @@
 // Manages extension lifecycle, initial storage defaults, and context menu actions.
-/**
- * FILE: src/background.js
- * PURPOSE: extension lifecycle, initial storage defaults, context menu actions
- * UI: browser background service worker
- * USED BY: src/manifest.json
- * KEY EXPORTS: none
- */
 
 console.log("AI Prompt Queue service worker loaded.");
 

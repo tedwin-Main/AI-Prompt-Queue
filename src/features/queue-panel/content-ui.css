@@ -1,10 +1,4 @@
-/**
- * FILE: src/features/queue-panel/content-ui.css
- * PURPOSE: styles for floating prompt queue panel, compact mode, color palette
- * UI: Chat > Prompt Queue > Floating Panel
- * USED BY: src/manifest.json
- * KEY EXPORTS: none
- */
+/* Styles floating prompt queue panel, compact mode, and color palette. */
 
 /* Chat > Prompt Queue > Floating Panel: container styling positioned beside chatbar */
 #apq-panel {
