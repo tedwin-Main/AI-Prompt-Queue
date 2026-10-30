@@ -1,3 +1,4 @@
+// Manages extension lifecycle, initial storage defaults, and context menu actions.
 /**
  * FILE: src/background.js
  * PURPOSE: extension lifecycle, initial storage defaults, context menu actions
@@ -14,7 +15,8 @@ chrome.runtime.onInstalled.addListener(() => {
 
   const defaults = {
     queue: [],
-    panelSize: "full"
+    panelSize: "full",
+    panelPosition: null
   };
 
   chrome.storage.local.get(Object.keys(defaults), (stored) => {

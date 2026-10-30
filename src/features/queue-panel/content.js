@@ -1,3 +1,4 @@
+// Manages prompt queue lifecycle, automation, and injected floating panel.
 /**
  * FILE: src/features/queue-panel/content.js
  * PURPOSE: manage prompt queue lifecycle, automation, injected floating panel
@@ -50,10 +51,11 @@ function injectFloatingPanel ()
     `;
     const wrapper = document.createElement( 'div' );
     wrapper.innerHTML = panelHTML;
-    document.body.appendChild( wrapper.firstElementChild );
+    const panel = wrapper.firstElementChild;
+    panel.style.visibility = 'hidden';
+    document.body.appendChild( panel );
 
     // Wire up events
-    const panel = document.getElementById( 'apq-panel' );
     const header = document.getElementById( 'apq-header' );
 
     let isDragging = false;
@@ -62,6 +64,8 @@ function injectFloatingPanel ()
 
     header.addEventListener( 'mousedown', ( e ) =>
     {
+        if ( e.button !== 0 ) return;
+
         isDragging = true;
         moved = false;
         startX = e.clientX;
@@ -70,11 +74,6 @@ function injectFloatingPanel ()
         const rect = panel.getBoundingClientRect();
         initialLeft = rect.left;
         initialTop = rect.top;
-
-        panel.style.bottom = 'auto';
-        panel.style.right = 'auto';
-        panel.style.left = initialLeft + 'px';
-        panel.style.top = initialTop + 'px';
 
         e.preventDefault();
     } );
@@ -86,16 +85,43 @@ function injectFloatingPanel ()
         const dx = e.clientX - startX;
         const dy = e.clientY - startY;
 
-        if ( Math.abs( dx ) > 3 || Math.abs( dy ) > 3 ) moved = true;
+        if ( !moved && ( Math.abs( dx ) > 3 || Math.abs( dy ) > 3 ) )
+        {
+            moved = true;
+            panel.style.bottom = 'auto';
+            panel.style.right = 'auto';
+        }
 
-        panel.style.left = ( initialLeft + dx ) + 'px';
-        panel.style.top = ( initialTop + dy ) + 'px';
+        if ( !moved ) return;
+
+        const maxLeft = Math.max( 0, window.innerWidth - panel.offsetWidth );
+        const maxTop = Math.max( 0, window.innerHeight - panel.offsetHeight );
+
+        const newLeft = Math.min( Math.max( 0, initialLeft + dx ), maxLeft );
+        const newTop = Math.min( Math.max( 0, initialTop + dy ), maxTop );
+
+        panel.style.left = newLeft + 'px';
+        panel.style.top = newTop + 'px';
     } );
 
-    document.addEventListener( 'mouseup', () =>
+    const finishDrag = () =>
     {
+        if ( isDragging && moved )
+        {
+            const rect = panel.getBoundingClientRect();
+            chrome.storage.local.set( {
+                panelPosition: {
+                    left: Math.round( rect.left ),
+                    top: Math.round( rect.top )
+                }
+            } );
+        }
         isDragging = false;
-    } );
+    };
+
+    document.addEventListener( 'mouseup', finishDrag );
+    window.addEventListener( 'blur', finishDrag );
+    window.addEventListener( 'resize', clampPanelPosition );
 
     // Chat > Prompt Queue > Header: cycle size modes and persist
     header.onclick = () =>
@@ -166,7 +192,7 @@ function injectFloatingPanel ()
 
     // Initial render
     updatePanelUI();
-    chrome.storage.local.get( [ 'pendingText', 'panelSize' ], ( res ) =>
+    chrome.storage.local.get( [ 'pendingText', 'panelSize', 'panelPosition' ], ( res ) =>
     {
         if ( res.pendingText )
         {
@@ -177,7 +203,21 @@ function injectFloatingPanel ()
         {
             applyPanelSize( res.panelSize );
         }
+        if ( res.panelPosition )
+        {
+            applyPanelPosition( res.panelPosition );
+        }
+        panel.style.visibility = 'visible';
     } );
+
+    // Fallback: reveal panel if storage read delays
+    setTimeout( () =>
+    {
+        if ( panel && panel.style.visibility === 'hidden' )
+        {
+            panel.style.visibility = 'visible';
+        }
+    }, 150 );
 
     document.getElementById( 'apq-input' ).addEventListener( 'input', ( e ) =>
     {
@@ -199,6 +239,23 @@ function injectFloatingPanel ()
         if ( changes.panelSize !== undefined )
         {
             applyPanelSize( changes.panelSize.newValue || 'full' );
+        }
+        if ( changes.panelPosition !== undefined )
+        {
+            if ( !isDragging )
+            {
+                if ( changes.panelPosition.newValue )
+                {
+                    applyPanelPosition( changes.panelPosition.newValue );
+                }
+                else
+                {
+                    panel.style.left = '';
+                    panel.style.top = '';
+                    panel.style.bottom = '';
+                    panel.style.right = '';
+                }
+            }
         }
         updatePanelUI();
     } );
@@ -226,6 +283,48 @@ function applyPanelSize ( size )
     else
     {
         if ( toggle ) toggle.innerText = '⊟';
+    }
+
+    clampPanelPosition();
+}
+
+// Chat > Prompt Queue > Panel: apply remembered position clamped within viewport
+function applyPanelPosition ( pos )
+{
+    const panel = document.getElementById( 'apq-panel' );
+    if ( !panel || !pos || typeof pos.left !== 'number' || typeof pos.top !== 'number' ) return;
+
+    const width = panel.offsetWidth || 320;
+    const height = panel.offsetHeight || 40;
+    const maxLeft = Math.max( 0, window.innerWidth - width );
+    const maxTop = Math.max( 0, window.innerHeight - height );
+
+    const left = Math.min( Math.max( 0, pos.left ), maxLeft );
+    const top = Math.min( Math.max( 0, pos.top ), maxTop );
+
+    panel.style.bottom = 'auto';
+    panel.style.right = 'auto';
+    panel.style.left = left + 'px';
+    panel.style.top = top + 'px';
+}
+
+// Chat > Prompt Queue > Panel: ensure panel stays within viewport on resize
+function clampPanelPosition ()
+{
+    const panel = document.getElementById( 'apq-panel' );
+    if ( !panel || panel.style.left === '' || panel.style.top === '' ) return;
+
+    const rect = panel.getBoundingClientRect();
+    const maxLeft = Math.max( 0, window.innerWidth - rect.width );
+    const maxTop = Math.max( 0, window.innerHeight - rect.height );
+
+    const clampedLeft = Math.min( Math.max( 0, rect.left ), maxLeft );
+    const clampedTop = Math.min( Math.max( 0, rect.top ), maxTop );
+
+    if ( clampedLeft !== rect.left || clampedTop !== rect.top )
+    {
+        panel.style.left = clampedLeft + 'px';
+        panel.style.top = clampedTop + 'px';
     }
 }
 
