@@ -1,12 +1,12 @@
-// features/chat-adapters/gemini-adapter.js
+// Finds Gemini input, send and stop buttons for the queue panel.
 
 const INPUT = 'div[contenteditable="true"].ql-editor';
 const INPUT_ALT = 'rich-textarea div[contenteditable]';
 const SUBMIT = 'button[aria-label="Send message"]';
 
-const isVisible = ( element ) =>
+const isVisible = ( element: Element | null ) =>
 {
-    if ( !element || element.hidden || element.getAttribute( 'aria-hidden' ) === 'true' ) return false;
+    if ( !element || ( element instanceof HTMLElement && element.hidden ) || element.getAttribute( 'aria-hidden' ) === 'true' ) return false;
     const style = getComputedStyle( element );
     return style.display !== 'none' && style.visibility !== 'hidden' && element.getClientRects().length > 0;
 };

@@ -1,8 +1,8 @@
-// features/chat-adapters/claude-adapter.js
+// Finds Claude input, send and stop buttons for the queue panel.
 
-const isVisible = ( element ) =>
+const isVisible = ( element: Element | null ) =>
 {
-    if ( !element || element.hidden || element.getAttribute( 'aria-hidden' ) === 'true' ) return false;
+    if ( !element || ( element instanceof HTMLElement && element.hidden ) || element.getAttribute( 'aria-hidden' ) === 'true' ) return false;
     const style = getComputedStyle( element );
     return style.display !== 'none' && style.visibility !== 'hidden' && element.getClientRects().length > 0;
 };

@@ -9,7 +9,8 @@
 </div>
 
 ## Map
-- `src/`: Chrome MV3 extension root (manifest, background, icons). Status: active
+- `src/`: Chrome MV3 extension root (manifest, background, icons); `.ts` sources, built `.js` gitignored. Status: active
+- `scripts/`: `build-extension.ts` (strip types in place), `zip-extension.ts` (Web Store ZIP). Status: active
 - `src/features/queue-panel/`: floating queue panel + automation. Status: active
 - `src/features/chat-adapters/`: ChatGPT, Claude, Gemini page adapters. Status: active
 - `docs/`: Chrome Web Store submission. Status: active
@@ -29,7 +30,7 @@
 
 Currently, the extension is available for manual installation:
 
-1. Download or clone this repository to your local machine.
+1. Download or clone this repository, then build once (Node 24+): `npm install && npm run build`. This strips the TypeScript sources into sibling `.js` files Chrome loads.
 2. Open Google Chrome and navigate to `chrome://extensions/`.
 3. Enable **"Developer mode"** in the top right corner.
 4. Click **"Load unpacked"** and select the `src` folder from this repository.

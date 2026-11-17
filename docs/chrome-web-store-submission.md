@@ -8,6 +8,8 @@ This guide covers the dashboard sections that can affect review: **Package**, **
 
 Version `1.3` does not request or use `activeTab`. If the Privacy page still shows a required **activeTab justification** field, the dashboard is reading an older uploaded package.
 
+Build the ZIP with `npm run zip` (Node 24+): it strips the `.ts` sources to `.js`, then writes `AI-Prompt-Queue-v<version>.zip` at the repo root with `manifest.json` at its root and no `.ts` files.
+
 Do not enter a made-up justification and do not submit while that field is present. Instead:
 
 1. Open **Build → Package**.

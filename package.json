@@ -1,0 +1,16 @@
+{
+  "name": "ai-prompt-queue",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "build": "node scripts/build-extension.ts",
+    "zip": "node scripts/build-extension.ts && node scripts/zip-extension.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.1.0",
+    "@types/node": "^24.0.0",
+    "typescript": "~5.9.3"
+  }
+}

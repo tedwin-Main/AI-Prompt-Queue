@@ -13,11 +13,7 @@ chrome.runtime.onInstalled.addListener(() => {
   };
 
   chrome.storage.local.get(Object.keys(defaults), (stored) => {
-    const missingDefaults = {};
-
-    for (const [key, value] of Object.entries(defaults)) {
-      if (stored[key] === undefined) missingDefaults[key] = value;
-    }
+    const missingDefaults = Object.fromEntries(Object.entries(defaults).filter(([key]) => stored[key] === undefined));
 
     if (Object.keys(missingDefaults).length > 0) {
       chrome.storage.local.set(missingDefaults);
